@@ -1,0 +1,70 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main, staging]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: main-content
+
+      - name: Checkout staging branch
+        uses: actions/checkout@v4
+        continue-on-error: true
+        with:
+          ref: staging
+          path: staging-content
+
+      - name: Combine main and staging into _site
+        run: |
+          mkdir -p _site
+          if [ -d "main-content" ]; then
+            shopt -s dotglob
+            cp -r main-content/* _site/ 2>/dev/null || true
+            rm -rf _site/.github _site/.git 2>/dev/null || true
+          fi
+          if [ -d "staging-content" ]; then
+            mkdir -p _site/staging
+            shopt -s dotglob
+            cp -r staging-content/* _site/staging/ 2>/dev/null || true
+            rm -rf _site/staging/.github _site/staging/.git 2>/dev/null || true
+          fi
+          echo "=== Generated structure ==="
+          ls -la _site/
+          echo "=== Staging folder ==="
+          ls -la _site/staging/ 2>/dev/null || echo "(staging branch not yet created)"
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
