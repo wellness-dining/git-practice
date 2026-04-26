@@ -3,14 +3,14 @@
    ======================================== */
 
 :root {
-  --green-dark: #2d5f3f;
-  --green: #4a8b5d;
-  --green-light: #a8cfb3;
-  --cream: #faf7f0;
+  --green-dark: #d63384;
+  --green: #ff6ec7;
+  --green-light: #ffcce5;
+  --cream: #fff0f6;
   --warm-gray: #6b6b6b;
   --dark: #2a2a2a;
   --white: #ffffff;
-  --accent: #e8a838;
+  --accent: #ff1493;
 }
 
 * {
